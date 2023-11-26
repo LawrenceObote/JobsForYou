@@ -10,7 +10,7 @@ const sendMessage = async (queue, message) => {
     connection = await amqp.connect(process.env.CLOUDAMQP_URL);
     const channel = await connection.createChannel();
     await channel.assertQueue(queue, { durable: false });
-    await channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)));
+    await channel.sendToQueue(queue, JSON.stringify(message));
     console.log(" [x] Sent '%s'", message);
     await channel.close();
   } catch (err) {

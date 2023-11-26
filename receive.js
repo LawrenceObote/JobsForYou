@@ -22,9 +22,8 @@ const queue = "job_postings";
       queue,
       async (message) => {
         const buffer = new Buffer.from([...message.content.toJSON().data]);
-        const arr = JSON.parse(buffer.toString());
-        const [jobTitleAndLocation, toEmail] = arr;
-
+        const obj = JSON.parse(JSON.parse(buffer.toString()));
+        const { jobTitleAndLocation, toEmail } = obj;
         console.log(" [x] Received '%s'", jobTitleAndLocation, toEmail);
         const text = {
           search_metadata: {
@@ -1169,29 +1168,28 @@ const queue = "job_postings";
             },
           ],
         };
-        // const getText = async () => {
-        //   const text = await getJson({
-        //     engine: "google_jobs",
-        //     q: jobTitleAndLocation,
-        //     api_key: process.env.SERPAPI_KEY,
-        //     hl: "en",
-        //   });
-        //   return text;
-        // };
+        const getText = async () => {
+          const text = await getJson({
+            engine: "google_jobs",
+            q: jobTitleAndLocation,
+            api_key: process.env.SERPAPI_KEY,
+            hl: "en",
+          });
+          return text;
+        };
 
         const jobs = await getText();
-        // const jobs = text;
+
         let html = "";
         for (let i = 0; i < 10; i++) {
           html = html + "<h1>" + jobs.jobs_results[i].title + "</h1>";
           html = html + "<h2>" + jobs.jobs_results[i].location + "</h2>";
           html = html + "<h3>" + jobs.jobs_results[i].company_name + "</h3>";
           html = html + "<p>" + jobs.jobs_results[i].description + "</p>";
-          console.log("loop done", html);
         }
 
         const msg = {
-          toEmail: toEmail, // Change to dynamic email
+          to: toEmail, // Change to dynamic email
           from: "dev.obote@gmail.com", // Change to your verified sender
           subject: "Here are your job listings",
           text: "and easy to do anywhere, even with Node.js",
