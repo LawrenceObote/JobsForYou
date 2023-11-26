@@ -9,7 +9,7 @@ const queue = "job_postings";
 
 (async () => {
   try {
-    const connection = await amqp.connect("amqp://localhost");
+    const connection = await amqp.connect(process.env.CLOUDAMQP_URL);
     const channel = await connection.createChannel();
 
     process.once("SIGINT", async () => {
@@ -21,7 +21,11 @@ const queue = "job_postings";
     await channel.consume(
       queue,
       async (message) => {
-        console.log(" [x] Received '%s'", message.content.toString());
+        const buffer = new Buffer.from([...message.content.toJSON().data]);
+        const arr = JSON.parse(buffer.toString());
+        const [jobTitleAndLocation, toEmail] = arr;
+
+        console.log(" [x] Received '%s'", jobTitleAndLocation, toEmail);
         const text = {
           search_metadata: {
             id: "656233a3fdca3e06f53ca983",
@@ -1168,28 +1172,26 @@ const queue = "job_postings";
         // const getText = async () => {
         //   const text = await getJson({
         //     engine: "google_jobs",
-        //     q: "barista+New+york",
+        //     q: jobTitleAndLocation,
         //     api_key: process.env.SERPAPI_KEY,
         //     hl: "en",
         //   });
-        //   console.log("yay", text);
         //   return text;
         // };
 
-        // const jobs = await getText();
-        const jobs = text;
+        const jobs = await getText();
+        // const jobs = text;
         let html = "";
-        console.log("-->", jobs);
         for (let i = 0; i < 10; i++) {
-          html = html + "<h1>" + text.jobs_results[i].title + "</h1>";
-          html = html + "<h2>" + text.jobs_results[i].location + "</h2>";
-          html = html + "<h3>" + text.jobs_results[i].company_name + "</h3>";
-          html = html + "<p>" + text.jobs_results[i].description + "</p>";
+          html = html + "<h1>" + jobs.jobs_results[i].title + "</h1>";
+          html = html + "<h2>" + jobs.jobs_results[i].location + "</h2>";
+          html = html + "<h3>" + jobs.jobs_results[i].company_name + "</h3>";
+          html = html + "<p>" + jobs.jobs_results[i].description + "</p>";
           console.log("loop done", html);
         }
 
         const msg = {
-          to: "lawrencerobote@gmail.com", // Change to dynamic email
+          toEmail: toEmail, // Change to dynamic email
           from: "dev.obote@gmail.com", // Change to your verified sender
           subject: "Here are your job listings",
           text: "and easy to do anywhere, even with Node.js",
