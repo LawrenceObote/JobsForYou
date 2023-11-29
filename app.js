@@ -5,10 +5,12 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const amqp = require("amqplib");
 const { sendMessage } = require("./send");
+const cors = require("cors");
 
 var app = express();
 
 app.use(logger("dev"));
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -20,10 +22,11 @@ app.get("/", (req, res) => {
 app.post("/message", (req, res) => {
   const message = {
     jobTitleAndLocation: req.body.jobTitleAndLocation,
-    toEmail: req.body.toEmail,
+    toEmail: req.body.email,
   };
+  console.log("--->", message);
   // const message = [req.body.jobTitleAndLocation, req.body.toEmail];
-  sendMessage("job_postings", JSON.stringify(message));
+  sendMessage(JSON.stringify(message));
 
   res.sendStatus(200);
 });
@@ -45,7 +48,7 @@ app.use(function (err, req, res, next) {
   });
 });
 
-app.listen(3000, () => {
+app.listen(3003, () => {
   console.log("Server started on port 3000");
 });
 
