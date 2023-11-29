@@ -6,6 +6,9 @@ document.getElementById("form").onsubmit = async (e) => {
   const emailAddress = document.getElementById("emailInput").value;
 
   await sendMessage(jobTitleAndLocation, emailAddress);
+  const form = document.getElementById("form");
+  alert("Email is Sending. Thanks for using JobsForYou!");
+  form.reset();
 };
 
 const sendMessage = async (jobTitleAndLocation, email) => {
