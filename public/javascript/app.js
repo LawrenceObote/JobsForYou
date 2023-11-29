@@ -9,7 +9,7 @@ document.getElementById("form").onsubmit = async (e) => {
 };
 
 const sendMessage = async (jobTitleAndLocation, email) => {
-  const url = "http://localhost:3003/message";
+  const url = "https://jobsforyou.onrender.com/message";
   const options = {
     method: "POST",
     headers: {
